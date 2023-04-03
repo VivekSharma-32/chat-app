@@ -5,9 +5,12 @@ import cors from "cors";
 import bodyParser from "body-parser";
 
 // routes
-import connectDB from "./src/config/connection.js";
+import AuthRoutes from "./src/Routes/authRoutes.js";
+import userRoutes from "./src/Routes/userRoutes.js";
+import postRoutes from "./src/Routes/postRoutes.js";
 import ChatRoutes from "./src/Routes/chatRoutes.js";
 import messageRoutes from "./src/Routes/messageRoutes.js";
+import connectDB from "./src/config/connection.js";
 
 const app = express();
 
@@ -26,6 +29,9 @@ app.use(express.static("public"));
 app.use("/images", express.static("images"));
 
 // routes
+app.use("/auth", AuthRoutes);
+app.use("/user", userRoutes);
+app.use("/post", postRoutes);
 app.use("/chat", ChatRoutes);
 app.use("/message", messageRoutes);
 
