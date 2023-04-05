@@ -17,9 +17,17 @@ const Chat = () => {
   const [chats, setChats] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState(null);
+  const [sendMessage, setSendMessage] = useState(null);
+  const [receiveMessage, setReceiveMessage] = useState(null);
 
   const socket = useRef();
 
+  // sending message to the socket server
+  useEffect(() => {
+    if (sendMessage !== null) {
+      socket.current.emit("send-message", sendMessage);
+    }
+  }, [sendMessage]);
   useEffect(() => {
     socket.current = io("http://localhost:8800");
     socket.current.emit("new-user-add", user._id);
@@ -27,6 +35,11 @@ const Chat = () => {
       setOnlineUsers(users);
     });
   }, [user]);
+
+  // receive message from the socket server
+  useEffect(() => {
+    socket.current.emit("recieve-message", receiveMessage);
+  }, []);
 
   useEffect(() => {
     const getChats = async () => {
@@ -39,6 +52,13 @@ const Chat = () => {
     };
     getChats();
   }, [user]);
+
+  const checkOnlineStatus = (chat) => {
+    const chatMembers = chat.members.find((member) => member !== user._id);
+    const online = onlineUsers.find((user) => user.userId === chatMembers);
+    return online ? true : false;
+  };
+
   return (
     <div className="Chat">
       {/* left side  */}
@@ -49,7 +69,11 @@ const Chat = () => {
           <div className="Chat-list">
             {chats?.map((chat) => (
               <div onClick={() => currentChat(chat)}>
-                <Conversation data={chat} currentUserId={user._id} />
+                <Conversation
+                  data={chat}
+                  currentUserId={user._id}
+                  online={checkOnlineStatus(chat)}
+                />
               </div>
             ))}
           </div>
@@ -70,7 +94,12 @@ const Chat = () => {
           </div>
 
           {/* chat body  */}
-          <ChatBox chat={currentChat} currentUser={user._id} />
+          <ChatBox
+            chat={currentChat}
+            currentUser={user._id}
+            setSendMessage={setSendMessage}
+            receiveMessage={receiveMessage}
+          />
         </div>
       </div>
     </div>
